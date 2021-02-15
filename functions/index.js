@@ -6,6 +6,8 @@ const {nthNumberFibonacci} = require("./fibonacci");
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
 exports.fibonacci = functions.https.onRequest((request, response) => {
+  response.set("Access-Control-Allow-Origin", "*");
+
   const {N: nAsString} = request.query;
 
   try {
@@ -14,21 +16,11 @@ exports.fibonacci = functions.https.onRequest((request, response) => {
     }
     const N = parseInt(nAsString);
     if (!isNaN(N) && N > 0 && N < 300) {
-      let rawdata = fs.readFileSync("./queryHistory.json");
-      let queryHistory = JSON.parse(rawdata);
-      fs.writeFileSync(
-        "./queryHistory.json",
-        JSON.stringify({
-          ...queryHistory,
-          [N]: queryHistory[N] ? queryHistory[N] + 1 : 1,
-        })
-      );
       response.send({result: nthNumberFibonacci(N).toFixed(0)});
     } else {
       throw "N is not a valid number";
     }
   } catch (error) {
-    console.log(error);
     response.status(400).send({error});
   }
 });
